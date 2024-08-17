@@ -88,6 +88,28 @@ Update the `.firebaserc` file in your project's root directory to include your F
 }
 ```
 
+### Setup Firestore
+
+TODO: later
+
+Create a firestore dataase: https://firebase.google.com/docs/firestore/manage-databases#create_a_database
+Create a collection called `faqs`
+
+Enable gcloud alpha features
+
+```bash
+$ gcloud components install alpha
+```
+
+Index firestore database
+
+```bash
+$ gcloud alpha firestore indexes composite create --project=YOUR_PROJECT_ID --collection-group=faqs --query-scope=COLLECTION --field-config=vector-config='{"dimension":"1536","flat": "{}"}',field-path=embedding --database='(default)'
+
+# example
+$ gcloud alpha firestore indexes composite create --project=genkit-rag-slack-bolt-sample --collection-group=faqs --query-scope=COLLECTION --field-config=vector-config='{"dimension":"1536","flat": "{}"}',field-path=embedding --database='(default)'
+```
+
 ### Setup Your Slack App
 
 1. Navigate to [Slack - Your Apps](https://api.slack.com/apps) and click `Create New App`.
