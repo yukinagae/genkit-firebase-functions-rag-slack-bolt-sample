@@ -11,7 +11,9 @@ import { openAI, textEmbedding3Small } from 'genkitx-openai'
 import * as z from 'zod'
 
 // Firebase initialization
-initializeApp()
+initializeApp({
+  // projectId: 'genkit-rag-slack-bolt-sample', TODO: for production to load local csv to remote firestore database
+})
 
 export * from './load-faqs' // Load CSV and embed function
 export * from './on-write-faq' // On write embedder function
