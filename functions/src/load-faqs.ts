@@ -1,6 +1,5 @@
 import * as path from 'node:path'
 import { embed } from '@genkit-ai/ai/embedder'
-import { configureGenkit } from '@genkit-ai/core'
 import { defineFlow, run } from '@genkit-ai/flow'
 import { FieldValue, getFirestore } from 'firebase-admin/firestore'
 import { textEmbedding3Small } from 'genkitx-openai'
@@ -23,10 +22,6 @@ const indexConfig = {
   vectorField: 'embedding',
   embedder: textEmbedding3Small,
 }
-
-configureGenkit({
-  enableTracingAndMetrics: false,
-})
 
 const firestore = getFirestore()
 

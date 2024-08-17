@@ -8,14 +8,18 @@
     "node": "22"
   },
   "scripts": {
+    "start": "npm run build && npm run genkit:remote",
+    "emulator": "npm run build && GENKIT_ENV=dev firebase emulators:start --inspect-functions",
+    "dev": "npm run build && npm run genkit:local",
     "build": "tsc",
+    "genkit:remote": "genkit start -o",
+    "genkit:local": "genkit start -o --attach http://localhost:3100 --port 4001",
+    "kill": "lsof -i:3000,3100,4000,4001,4400,5001,5050,8080,8085,9099,9199 -t | xargs kill",
+    "deploy": "npm run build && firebase deploy --only functions",
+    "logs": "firebase functions:log",
     "typecheck": "tsc --noEmit",
     "check": "biome check ./src",
-    "fix": "biome check --write ./src",
-    "genkit": "npm run build && genkit start -o --attach http://localhost:3100 --port 4001",
-    "emulator": "npm run build && GENKIT_ENV=dev firebase emulators:start --inspect-functions",
-    "deploy": "npm run build && firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "fix": "biome check --write ./src"
   },
   "dependencies": {
     "@genkit-ai/ai": "^0.5.4",
