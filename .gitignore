@@ -154,3 +154,6 @@ lib
 
 # prompts
 functions/prompts/answer.prompt
+
+# data for RAG
+functions/data/*.csv

@@ -1,19 +1,42 @@
+import { retrieve } from '@genkit-ai/ai'
 import { configureGenkit } from '@genkit-ai/core'
 import { dotprompt, promptRef } from '@genkit-ai/dotprompt'
+import { defineFirestoreRetriever, firebase } from '@genkit-ai/firebase'
 import { defineFlow, runFlow } from '@genkit-ai/flow'
 import { App, ExpressReceiver } from '@slack/bolt'
+import { initializeApp } from 'firebase-admin/app'
+import { getFirestore } from 'firebase-admin/firestore'
 import { onRequest } from 'firebase-functions/v2/https'
-import { openAI } from 'genkitx-openai'
+import { openAI, textEmbedding3Small } from 'genkitx-openai'
 import * as z from 'zod'
+
+// Firebase initialization
+initializeApp()
+
+export * from './load-faqs' // Load CSV and embed function
+export * from './on-write-faq' // On write embedder function
 
 // Configure Genkit with necessary plugins and settings
 configureGenkit({
   plugins: [
     dotprompt(),
+    firebase(),
     openAI({ apiKey: process.env.OPENAI_API_KEY }), // Use the OpenAI plugin with the provided API key.
   ],
   logLevel: 'debug', // Log debug output to the console.
   enableTracingAndMetrics: true, // Perform OpenTelemetry instrumentation and enable trace collection.
+})
+
+const firestore = getFirestore()
+
+const retrieverRef = defineFirestoreRetriever({
+  name: 'faqRetriever',
+  firestore,
+  collection: 'faqs',
+  contentField: 'content',
+  vectorField: 'embedding',
+  embedder: textEmbedding3Small,
+  distanceMeasure: 'COSINE',
 })
 
 const answerPrompt = promptRef('answer') // Reference to the answer prompt: `functions/prompts/answer.prompt`
@@ -26,8 +49,14 @@ const answerFlow = defineFlow(
     outputSchema: z.string(),
   },
   async (question: string) => {
+    const docs = await retrieve({
+      retriever: retrieverRef,
+      query: question,
+      options: { limit: 3 },
+    })
     const llmResponse = await answerPrompt.generate({
       input: {
+        data: docs.map((doc) => doc.content[0].text || ''),
         question: question,
       },
     })
